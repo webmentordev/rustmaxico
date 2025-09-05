@@ -45,7 +45,7 @@
                                         <div class="flex items-center text-sm">
                                             <h3>Last updated: </h3>
                                             <span class="text-[#f7d708]">{{ time }}</span>
-                                            <button class="ml-1"><img
+                                            <button @click="fetchServerStats()" class="ml-1"><img
                                                     src="https://api.iconify.design/material-symbols:refresh-rounded.svg?color=%233af86a"
                                                     width="20px"></img></button>
                                         </div>
@@ -67,10 +67,13 @@
                                             width="20px">
                                         <span>Offline</span>
                                     </div>
-                                    <!-- <div class="py-2 px-4 mx-1 border border-[#fbff00] text-[#fbff00] flex items-center">
-                                <img class="mr-2" src="https://api.iconify.design/codicon:pulse.svg?color=%23fbff00" width="20px">
-                                <strong>{{ ping + 'ms' }}</strong>
-                                </div> -->
+                                    <!-- <div
+                                        class="py-2 px-4 mx-1 border border-[#fbff00] text-[#fbff00] flex items-center">
+                                        <img class="mr-2"
+                                            src="https://api.iconify.design/codicon:pulse.svg?color=%23fbff00"
+                                            width="20px">
+                                        <strong>{{ ping + 'ms' }}</strong>
+                                    </div> -->
                                 </div>
 
                                 <div class="grid grid-cols-4">
@@ -197,32 +200,50 @@ const team_limit = ref("4");
 const max_pop = ref("80");
 const timezone = ref("America/Chicago");
 
-await $fetch(`https://api.battlemetrics.com/servers/${serverID}`).then(result => {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true
+fetchServerStats();
+
+async function fetchServerStats() {
+    pending.value = true;
+    await $fetch(`https://api.battlemetrics.com/servers/${serverID}`).then(result => {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+        let record = result.data.attributes;
+        server_name.value = record.name;
+        status.value = record.status;
+        time.value = timeString;
+        players.value = record.players + "/" + record.maxPlayers;
+        rank.value = record.rank;
+        ip.value = record.ip;
+        port.value = record.port;
+        mapUrl.value = record.details.rust_maps.thumbnailUrl;
+        map_type.value = record.details.map;
+        seed.value = record.details.rust_world_seed;
+        size.value = record.details.rust_world_size;
+        team_limit.value = record.details.rust_settings.teamUILimit;
+        timezone.value = record.details.rust_settings.timeZone;
+        last_wipe.value = new Date(record.details.rust_last_wipe).toLocaleString();
+        max_pop.value = record.maxPlayers;
+        pending.value = false;
     });
-    let record = result.data.attributes;
-    server_name.value = record.name;
-    status.value = record.status;
-    time.value = timeString;
-    players.value = record.players + "/" + record.maxPlayers;
-    rank.value = record.rank;
-    ip.value = record.ip;
-    port.value = record.port;
-    mapUrl.value = record.details.rust_maps.thumbnailUrl;
-    pending.value = false;
-    map_type.value = record.details.map;
-    seed.value = record.details.rust_world_seed;
-    size.value = record.details.rust_world_size;
-    team_limit.value = record.details.rust_settings.teamUILimit;
-    timezone.value = record.details.rust_settings.timeZone;
-    last_wipe.value = new Date(record.details.rust_last_wipe).toLocaleString();
-    max_pop.value = record.maxPlayers;
-});
+}
 
-
+// const TARGET_IP = '50.115.8.118';
+// function playerPing() {
+//     const start = performance.now();
+//     fetch(`http://${TARGET_IP}`, { mode: 'no-cors' })
+//         .then(() => {
+//             const ms = Math.round(performance.now() - start);
+//             ping.value = ms;
+//             console.log(`${ms}ms`)
+//         })
+//         .catch(() => {
+//             console.log('failed');
+//         });
+// }
+// playerPing();
 
 </script>
