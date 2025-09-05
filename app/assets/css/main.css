@@ -35,3 +35,7 @@ strong {
 button {
     @apply cursor-pointer;
 }
+
+.info-panel li {
+    @apply py-2 px-3 odd:bg-white/5 flex justify-between rounded-lg;
+}
